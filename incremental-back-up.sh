@@ -2,24 +2,24 @@
 
 DATE=`date +%Y%m%d`
 
-#Este checkeo lo hago solo para ver si existe un incremental
+#I do this check just to see if there is an incremental
 if [ -f /path/to/workspace/DIR.level0.snar ]; then
-  #copio el level 0 de incremental, si no lo hiciera
-  #para recuperar un estado del DIR tendria que 
-  #extraer incremental por incremental hasta el momento que quiera
-  #de esta forma, solo extraigo el full y el que quiero restaurar
+  # copy the level 0 of incremental, if not
+  #to retrieve a state from the DIR you would have to
+  #extract incremental by incremental until the time you want
+  #in this way, I only extract the full and the one I want to restore
   cp /path/to/workspace/DIR.level0.snar /path/to/workspace/DIR.snar
   
-  #Por practicidad me muevo al directorio que contiene a DIR
-  # && hago tar con incremental y lo grabo con nombre diferencial
-  # && lo muevo al directorio de recoleccion/almacenamiento
-  cd /path/to/dir && tar --listed-incremental /path/to/workspace/DIR.snar -czpf /path/to/workspace/DIR-$DATE-incremental.tar.gz DIR && mv /path/to/workspace/DIR-$DATE-incremental.tar.gz /backup
+  #For convenience I move to the directory that contains DIR
+  # && do tar with incremental and save it with differential name
+  # && move it to the collection/storage directory
+  cd /path/to/dir && tar --listed-incremental /path/to/workspace/DIR.snar -czpf /path/to/workspace/DIR-$DATE-incremental.tar.gz DIR && mv /path/to /workspace/DIR-$DATE-incremental.tar.gz /backup
 fi
 
-# para recuperar un backup incremental hay que tirar:
-# tar -xzpf ARCHIVO_BACKUP_FULL.tar.gz
-# tar -xzpf ARCHIVO_INCREMENTAL.tar.gz
+# to recover an incremental backup you have to throw:
+# tar -xzpf FILE_BACKUP_FULL.tar.gz
+# tar -xzpf INCREMENTAL_FILE.tar.gz
 #
-# ej:
-# tar -xzpf IPGH-[FECHA_ACA]-full.tar.gz
-# tar -xzpf IPGH-[FECHA_RESTORE_DESEADA_ACA]-incremental.tar.gz
+# ex:
+# tar -xzpf PAIGH-[DATE_YEAR]-full.tar.gz
+# tar -xzpf PAIGH-[FECHA_RESTORE_DESEADA_ACA]-incremental.tar.gz
