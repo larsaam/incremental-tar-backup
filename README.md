@@ -1,81 +1,81 @@
 incremental-tar-backup
-======================
+=======================
 
-Bash script para backups incrementales
-
-
-Configuración/Implementación
-============================
-
-Reemplazar en los scripts las referencias a:
-
-* <code>DIR</code>: el directorio que queremos backupear
-* <code>/path/to/dir</code>: la ruta al directorio que CONTIENE a <code>DIR</code>
-* <code>/path/to/workspace</code>: la ruta a un directorio que usemos temporalmente para alojar los tar/snar
-* <code>/backup</code>: un directorio donde se alojan los backups, probablemente un servidor de almacenamiento montado en un directorio local
-* <code>DATE</code>: una variable que declaro para tener referencia de la fecha y usarla en los nombres de los archivos (no es necesario cambiarla)
-
-Correr por primera vez el script [full-back-up.sh](https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh) a mano para inicializar los archivos incrementales y el snapshot.
+Bash script for incremental backups
 
 
-Uso típico
+Configuration/Implementation
+=============================
+
+Replace in the scripts the references to:
+
+* <code>DIR</code>: the directory we want to backup
+* <code>/path/to/dir</code>: the path to the directory CONTAINING <code>DIR</code>
+* <code>/path/to/workspace</code>: the path to a directory that we use temporarily to host the tar/snar
+* <code>/backup</code>: a directory where the backups are located, probably a storage server mounted in a local directory
+* <code>DATE</code>: a variable that I declare to reference the date and use it in file names (no need to change it)
+
+First run the script [full-back-up.sh](https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh) by hand to initialize the files incremental and snapshot.
+
+
+typical use
 ==========
 
-Estos scripts sirven principalmente para guardar estados de un directorio de manera incremental.
-Dicho de otra manera, podemos armar estos scripts para que hagan backup de un sitio que tenemos
-publicado sin tener que copiar todos los archivos, solo los que hayan cambiado.
-Ejemplo de las variables de referencia:
+These scripts are mainly used to save states of a directory incrementally.
+In other words, we can build these scripts to make a backup of a site that we have
+published without having to copy all the files, only the ones that have changed.
+Example of reference variables:
 
-* <code>DIR</code>: /var/www/misitio
+* <code>DIR</code>: /var/www/mysite
 * <code>/path/to/dir</code>: /var/www
-* <code>/path/to/workspace</code>: /var/backups/sitioweb
+* <code>/path/to/workspace</code>: /var/backups/website
 * <code>/backup</code>: /mount/backupserverNFS
 
 
-Crontab
+crontab
 =======
 
-Para que estos scripts tengan sentido habrá que ponerlos en el [cron](https://en.wikipedia.org/wiki/Cron).
+For these scripts to make sense, they must be put in the [cron](https://en.wikipedia.org/wiki/Cron).
 
-Hay que estar atento que la cuenta que genere el crontab tenga permisos de lectura/escritura en los directorios
-correspondientes.
+You have to be careful that the account that generates the crontab has read/write permissions on the directories
+corresponding.
 
-Luego, el backup full no queremos correrlo muy seguido, en mi caso es cada 10 días a las 3AM (o, según dicen, cada vez que el
-día del mes es múltiplo de 10). Ej:
+Then, we do not want to run the full backup very often, in my case it is every 10 days at 3AM (or, as they say, every time the
+day of the month is a multiple of 10). Ex:
 
 <pre>
 0 3 */10 * * /path/to/full-backup.sh
 </pre>
 
-Y para que el incremental se corra todos los días a las 4AM:
+And for the incremental to run every day at 4AM:
 
 <pre>
 0 4 * * * /path/to/incremental-backup.sh
 </pre>
 
-Es importante que corras la primera vez el [full-back-up.sh](https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh) a mano (no esperes que lo haga el cron).
+It is important that you run the [full-back-up.sh](https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh) by hand the first time (not wait for the cron to do it).
 
 
-Incremental simple vs incremental por niveles
-=============================================
+Simple incremental vs incremental by levels
+==============================================
 
-El incremental del [tar](http://kb.iu.edu/data/acfi.html) se puede usar de 2 maneras:
+The [tar](http://kb.iu.edu/data/acfi.html) incremental can be used in 2 ways:
 
-* Creando incrementales directos sobre un full back up (simple)
-* Creando niveles de incrementales (menos simple)
+* Creating direct incrementals on a full back up (simple)
+* Creating incremental levels (less simple)
 
-En el primer caso, se hace un incremental usando el parametro <code>--listed-incremental</code> y un archivo de
-snapshot (.snar) que se encarga de comparar y definir las diferencias para incluir en el incremental. Para restaurar
-<code>DIR</code> bastará con extraer el full backup y luego el de la fecha a restaurar.
+In the first case, an incremental is done using the <code>--listed-incremental</code> parameter and a file of
+snapshot (.snar) that is responsible for comparing and defining the differences to include in the incremental. To restore
+<code>DIR</code> it will suffice to extract the full backup and then the date to be restored.
 
 <pre>
 tar -xzpf DIR-20130720-full.tar.gz
 tar -xzpf DIR-20130724-incremental.tar.gz
 </pre>
 
-En el segundo, el incremental se hace siempre sobre otro incremental. Si bien esta forma da más control sobre
-el incremental y el tamaño de archivo, cuando se quiere restaurar <code>DIR</code> habrá que hacerlo secuencialmente
-como están hechos los incrementales. Ejemplo considerando que tenemos 4 incrementales:
+In the second, the incremental is always done over another incremental. While this form gives more control over
+the incremental and the file size, when you want to restore <code>DIR</code> it will have to be done sequentially
+How are incrementals made? Example considering that we have 4 incrementals:
 
 <pre>
 tar -xzpf DIR-20130720-full.tar.gz
